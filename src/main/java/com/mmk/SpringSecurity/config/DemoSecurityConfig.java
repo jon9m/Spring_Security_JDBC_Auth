@@ -17,9 +17,9 @@ public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
 		// Add users for the in memory authentication
 		UserBuilder users = User.withDefaultPasswordEncoder();
 		auth.inMemoryAuthentication().withUser(users.username("manoj").password("test123").roles("ADMIN"))
-				.withUser(users.username("sam").password("test123").roles("USER"))
+				.withUser(users.username("sam").password("test123").roles("USER", "GUSET"))
 				.withUser(users.username("mmk").password("test123").roles("GUSET"))
-				.withUser(users.username("jon").password("test123").roles("USER"));
+				.withUser(users.username("jon").password("test123").roles("ADMIN", "USER"));
 	}
 
 
@@ -27,6 +27,10 @@ public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
+			.antMatchers("/").hasRole("GUEST")
+			.antMatchers("/home/**").hasRole("USER")
+			.antMatchers("/admin/**").hasRole("ADMIN")
+				
 			.anyRequest()
 			.authenticated()
 			.and()
@@ -35,6 +39,10 @@ public class DemoSecurityConfig extends WebSecurityConfigurerAdapter {
 			.loginProcessingUrl("/authenticateTheUser")
 			.permitAll()
 			.and()
+			
+			.exceptionHandling().accessDeniedPage("/accessDenied")
+			.and()
+			
 			.logout()			
 			.permitAll();
 	}
